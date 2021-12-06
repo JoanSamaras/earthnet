@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Dashboard from '../layouts/Dashboard/Dashboard';
-import { Typography, Grid, List, ListItem, ListItemText, makeStyles } from '@material-ui/core';
+import { Grid, List, ListItem, ListItemText, makeStyles } from '@material-ui/core';
 import {
   Portlet,
   PortletHeader,
@@ -8,6 +8,7 @@ import {
   PortletContent,
   EsaButton
 } from '../layouts/components';
+import Plot from 'react-plotly.js';
 
 const styles = theme => ({
   flex: {
@@ -67,6 +68,10 @@ const useStyles = makeStyles(styles);
 export default function Wellbore() {
   const classes = useStyles();
   const [selectedOptions, setSelect] = useState([]);
+  const [chartLayout, setChartLayout] = useState({
+    width: 700,
+    height: 500
+  });
 
   const handleSelect = value => {
     const currentIndex = selectedOptions.indexOf(value);
@@ -80,6 +85,16 @@ export default function Wellbore() {
   };
 
   const isSelected = value => selectedOptions.includes(value);
+
+  const plotlyGridParentRef = useRef(HTMLDivElement);
+
+  useEffect( () => {
+    if ( plotlyGridParentRef.current ) {
+      const { width, height } = plotlyGridParentRef.current.getBoundingClientRect();
+      
+      setChartLayout({ width, height })
+    }
+  }, [plotlyGridParentRef] );
 
   return (
     <Dashboard>
@@ -159,20 +174,31 @@ export default function Wellbore() {
               </Portlet>
               
               <EsaButton fullWidth className={classes.button}>
-                Click me
+                Show plot
               </EsaButton>
             </Grid>
-
-
           </Grid>
         </Grid>
 
         <Grid item xs={12} md={7} container spacing={2}>
           <Grid item xs={12} container spacing={2}>
-            <Grid item xs={12}>
-
-              <Typography variant="h2">Wellbore 2.</Typography>
-
+            <Grid item xs={12} ref={ plotlyGridParentRef }>
+            <Plot
+              data={[
+                {
+                  x: [1, 2, 3],
+                  y: [2, 6, 3],
+                  type: 'scatter',
+                  marker: {color: 'red'},
+                }
+              ]}
+              layout={{ 
+                title: 'Wells Plot',
+                width: chartLayout.width,
+                height: chartLayout.height
+              }}
+              config={{ responsive: true }}
+            />
             </Grid>
           </Grid>
         </Grid>
