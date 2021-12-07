@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { List, ListItem, ListItemText, makeStyles } from '@material-ui/core';
 import {
@@ -7,11 +7,10 @@ import {
   PortletLabel,
   PortletContent
 } from '../index';
-import { esaAPI } from '../../../store/slices/api';
-import { useDispatch } from 'react-redux';
-import { updateWells } from '../../../store/slices/wells';
-import { updateLogs } from '../../../store/slices/logs';
-import { updateFormations } from '../../../store/slices/formations';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateSelections as updateWellSelections } from '../../../store/slices/wells';
+import { updateSelections as updateLogSelections } from '../../../store/slices/logs';
+import { updateSelections as updateFormationSelections } from '../../../store/slices/formations';
 
 const styles = theme => ({
   flexGrow: {
@@ -44,15 +43,10 @@ const styles = theme => ({
 const useStyles = makeStyles(styles);
 
 const listConfig = {
-  get: {
-    wells: esaAPI.endpoints.getWells.initiate,
-    logs: esaAPI.endpoints.getLogs.initiate,
-    formations: esaAPI.endpoints.getFormations.initiate
-  },
   update: {
-    wells: updateWells,
-    logs: updateLogs,
-    formations: updateFormations
+    wells: updateWellSelections,
+    logs: updateLogSelections,
+    formations: updateFormationSelections
   },
   displayField: {
     wells: 'name',
@@ -62,34 +56,30 @@ const listConfig = {
 }
 
 const EsaList = props => {
+  const { title, listType, ...rest } = props;
+
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [options, setOptions] = useState([]);
-  const [selectedOptions, setSelect] = useState([]);
+  const selectedOptions = useSelector( state => state[listType].selectedIds );
+  const [selections, setSelect] = useState([]);
 
   const handleSelect = value => {
-    const currentIndex = selectedOptions.indexOf(value);
+    const currentIndex = selectedOptions.indexOf(value.id);
     const newSelectedOptions = [...selectedOptions];
+    
     if (currentIndex === -1) {
-      newSelectedOptions.push(value);
+      newSelectedOptions.push(value.id);
     } else {
       newSelectedOptions.splice(currentIndex, 1);
     }
+    
     setSelect(newSelectedOptions);
+    dispatch( listConfig.update[listType]({ selections: newSelectedOptions }) );
   };
+  
+  const isSelected = value => selectedOptions.includes(value.id);
 
-  const isSelected = value => selectedOptions.includes(value);
-
-  const { title, listType, ...rest } = props;
-
-  useEffect( async () => {
-    const listSubscription = await dispatch( listConfig.get[listType]() );
-    dispatch( listConfig.update[listType]( listSubscription.data ) );
-    setOptions( listSubscription.data );
-
-    return listSubscription.unsubscribe;
-  }, [] )
-
+  const options = useSelector( state => state[listType].data );
 
   return (
     <Portlet className={classes.flexGrow} {...rest}>

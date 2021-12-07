@@ -1,15 +1,25 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+const initialState = {
+  data: [],
+  selectedIds: []
+}
+
 const logsSlice = createSlice({
   name: 'logs',
-  initialState: {},
+  initialState,
   reducers: {
     updateLogs(state, actions) {
-      state.logs = [...actions.payload];
+      const { data } = actions.payload;
+      state.data = [...data];
+    },
+    updateSelections(state, actions) {
+      const { selections } = actions.payload;
+      state.selectedIds = [...selections];
     }
   }
 })
 
-export const { updateLogs } = logsSlice.actions;
+export const { updateLogs, updateSelections } = logsSlice.actions;
 
 export default logsSlice.reducer

@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Grid, List, ListItem, ListItemText, makeStyles, Tooltip } from '@material-ui/core';
+import { Grid, makeStyles, Tooltip } from '@material-ui/core';
 import {
-  Portlet,
-  PortletHeader,
-  PortletLabel,
-  PortletContent,
   EsaButton,
   EsaList
 } from '../index';
+import { esaAPI } from '../../../store/slices/api';
+import { updateWells } from '../../../store/slices/wells';
+import { updateLogs } from '../../../store/slices/logs';
+import { updateFormations } from '../../../store/slices/formations';
+import { useDispatch, useSelector } from 'react-redux';
 
 const styles = theme => ({
   flex: {
@@ -58,24 +59,17 @@ const useStyles = makeStyles(styles);
 
 const EsaFilters = props => {
   const classes = useStyles();
-  const [selectedOptions, setSelect] = useState([]);
+  const dispatch = useDispatch();
 
-  const handleSelect = value => {
-    const currentIndex = selectedOptions.indexOf(value);
-    const newSelectedOptions = [...selectedOptions];
-    if (currentIndex === -1) {
-      newSelectedOptions.push(value);
-    } else {
-      newSelectedOptions.splice(currentIndex, 1);
-    }
-    setSelect(newSelectedOptions);
-  };
+  const isFiltersButtonDisabled = () => {
+    const wellsSelections = useSelector( state => state.wells.selectedIds );
+    const logsSelections = useSelector( state => state.logs.selectedIds );
+    const formationsSelections = useSelector( state => state.formations.selectedIds );
 
-  // const isFiltersButtonDisabled = () => (
-  //   selectedOptions.some( key => key.includes('') )
-  // )
-
-  const isFiltersButtonDisabled = () => true;
+    return (
+      wellsSelections.length >= 1 && logsSelections.length >= 1 && formationsSelections.length >= 1
+    )
+  }
 
   const plotButton = (
     <EsaButton fullWidth className={classes.button} disabled={isFiltersButtonDisabled()} onClick={() => { console.log('btn clicked') }}>
@@ -83,7 +77,33 @@ const EsaFilters = props => {
     </EsaButton>
   );
 
-  const isSelected = value => selectedOptions.includes(value);
+  useEffect( async () => {
+    const listSubscriptionArr = [];
+    listSubscriptionArr.push({
+      getList: esaAPI.endpoints.getWells.initiate,
+      updateState: updateWells
+    });
+    listSubscriptionArr.push({
+      getList: esaAPI.endpoints.getLogs.initiate,
+      updateState: updateLogs
+    });
+    listSubscriptionArr.push({
+      getList: esaAPI.endpoints.getFormations.initiate,
+      updateState: updateFormations
+    });
+    
+    const unsubscriptions = [];
+
+    listSubscriptionArr.forEach( async subs => {
+      const listSubscription = dispatch( subs.getList() );
+      const data = await listSubscription.data;
+      dispatch( subs.updateState({ data }) );
+
+      unsubscriptions.push( listSubscription );
+    })
+
+    return unsubscriptions.map( subs => subs.unsubscribe );
+  }, [] )
 
   return (
     <Grid item xs={12} container spacing={2} className={`${ classes.flexColumn } ${ classes.fullHeight }`} {...props}>
