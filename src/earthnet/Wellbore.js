@@ -3,6 +3,8 @@ import Dashboard from '../layouts/Dashboard/Dashboard';
 import { Grid, makeStyles } from '@material-ui/core';
 import { EsaFilters } from '../layouts/components';
 import Plot from 'react-plotly.js';
+import { esaAPI } from '../store/slices/api';
+import { useDispatch } from 'react-redux';
 
 const styles = theme => ({
   fullHeight: { 
@@ -13,12 +15,25 @@ const useStyles = makeStyles(styles);
 
 export default function Wellbore() {
   const classes = useStyles();
+  const dispatch = useDispatch();
   const [chartLayout, setChartLayout] = useState({
     width: 700,
     height: 500
   });
+  const [wellsList, setWellsList] = useState([]);
 
   const plotlyGridParentRef = useRef(HTMLDivElement);
+
+  useEffect( async () => {
+    const test = await dispatch( esaAPI.endpoints.getWells.initiate() );
+    setWellsList( test.data );
+
+    return test.unsubscribe;
+  }, [] )
+
+  useEffect( () => {
+    console.log('wells', wellsList)
+  }, [wellsList] )
 
   useEffect( () => {
     if ( plotlyGridParentRef.current ) {

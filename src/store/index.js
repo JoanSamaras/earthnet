@@ -1,14 +1,14 @@
-import { routerMiddleware } from 'connected-react-router';
-import { createStore, applyMiddleware, compose } from 'redux';
-import thunk from 'redux-thunk';
 import createRootReducer from './reducers';
+import { configureStore } from '@reduxjs/toolkit';
+import { setupListeners } from '@reduxjs/toolkit/query';
 import history from '../history';
+import { esaAPI } from './slices/api';
 
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+const store = configureStore({
+  reducer: createRootReducer(history),
+  middleware: getDefaultMiddleware => getDefaultMiddleware().concat(esaAPI.middleware),
+})
 
-const store = createStore(
-  createRootReducer(history),
-  composeEnhancers(applyMiddleware(routerMiddleware(history), thunk))
-);
+setupListeners( store.dispatch )
 
 export default store;
