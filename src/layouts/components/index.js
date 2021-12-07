@@ -10,3 +10,4 @@ export { default as MultiSelect } from './EsaSelect/MultiSelect';
 export { default as EsaSelect } from './EsaSelect/EsaSelect';
 export { default as EsaButton } from './EsaButton/EsaButton';
 export { default as EsaFilters } from './EsaFilters/EsaFilters';
+export { default as EsaList } from './EsaList/EsaList';

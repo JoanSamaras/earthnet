@@ -5,6 +5,7 @@ import { EsaFilters } from '../layouts/components';
 import Plot from 'react-plotly.js';
 import { esaAPI } from '../store/slices/api';
 import { useDispatch } from 'react-redux';
+import { updateWells } from '../store/slices/wells';
 
 const styles = theme => ({
   fullHeight: { 
@@ -24,16 +25,17 @@ export default function Wellbore() {
 
   const plotlyGridParentRef = useRef(HTMLDivElement);
 
-  useEffect( async () => {
-    const test = await dispatch( esaAPI.endpoints.getWells.initiate() );
-    setWellsList( test.data );
+  // useEffect( async () => {
+  //   const test = await dispatch( esaAPI.endpoints.getWells.initiate() );
+  //   setWellsList( test.data );
+  //   dispatch( updateWells( test.data ) )
 
-    return test.unsubscribe;
-  }, [] )
+  //   return test.unsubscribe;
+  // }, [] )
 
-  useEffect( () => {
-    console.log('wells', wellsList)
-  }, [wellsList] )
+  // useEffect( () => {
+  //   console.log('wells', wellsList)
+  // }, [wellsList] )
 
   useEffect( () => {
     if ( plotlyGridParentRef.current ) {

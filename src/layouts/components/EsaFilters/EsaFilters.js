@@ -6,7 +6,8 @@ import {
   PortletHeader,
   PortletLabel,
   PortletContent,
-  EsaButton
+  EsaButton,
+  EsaList
 } from '../index';
 
 const styles = theme => ({
@@ -26,12 +27,6 @@ const styles = theme => ({
   },
   button: { 
     marginTop: theme.spacing(3) 
-  },
-  portletContent: {
-    height: 0,
-    minHeight: 400,
-    display: 'flex',
-    flexDirection: 'column'
   },
   header: {
     padding: theme.spacing(0, 1, 0, 2),
@@ -94,75 +89,24 @@ const EsaFilters = props => {
     <Grid item xs={12} container spacing={2} className={`${ classes.flexColumn } ${ classes.fullHeight }`} {...props}>
 
       <Grid item xs={12} className={classes.flex}>
-        <Portlet className={classes.flexGrow}>
-          <PortletHeader className={classes.header}>
-            <PortletLabel title="Wells" />
-          </PortletHeader>
-          <PortletContent className={classes.portletContent} noPadding>
-            <List>
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].map(
-                option => (
-                  <ListItem
-                    key={option}
-                    className={classes.listItem}
-                    selected={isSelected(option)}
-                    onClick={() => handleSelect(option)}
-                  >
-                    <ListItemText primary={`item-${option}`} />
-                  </ListItem>
-                )
-              )}
-            </List>
-          </PortletContent>
-        </Portlet>
+        <EsaList
+          title='Wells'
+          listType='wells'
+        />
       </Grid>
 
       <Grid item xs={12} className={classes.flex}>
-        <Portlet className={classes.flexGrow}>
-          <PortletHeader className={classes.header}>
-            <PortletLabel title="Logs" />
-          </PortletHeader>
-          <PortletContent className={classes.portletContent} noPadding>
-            <List>
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].map(
-                option => (
-                  <ListItem
-                    key={option}
-                    className={classes.listItem}
-                    selected={isSelected(option)}
-                    onClick={() => handleSelect(option)}
-                  >
-                    <ListItemText primary={`item-${option}`} />
-                  </ListItem>
-                )
-              )}
-            </List>
-          </PortletContent>
-        </Portlet>
+        <EsaList
+          title='Logs'
+          listType='logs'
+        />
       </Grid>
 
       <Grid item xs={12} className={classes.flexColumn}>
-        <Portlet className={classes.flexGrow}>
-          <PortletHeader className={classes.header}>
-            <PortletLabel title="Formations" />
-          </PortletHeader>
-          <PortletContent className={classes.portletContent} noPadding>
-            <List>
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].map(
-                option => (
-                  <ListItem
-                    key={option}
-                    className={classes.listItem}
-                    selected={isSelected(option)}
-                    onClick={() => handleSelect(option)}
-                  >
-                    <ListItemText primary={`item-${option}`} />
-                  </ListItem>
-                )
-              )}
-            </List>
-          </PortletContent>
-        </Portlet>
+        <EsaList
+          title='Formations'
+          listType='formations'
+        />
         
         { isFiltersButtonDisabled() ? (
           <Tooltip title="At least one Well, one Log and one Formation should be selected">
