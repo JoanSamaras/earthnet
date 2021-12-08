@@ -60,6 +60,9 @@ const useStyles = makeStyles(styles);
 const EsaFilters = props => {
   const classes = useStyles();
   const dispatch = useDispatch();
+  const { calculatePlot, ...rest } = props;
+
+  //TODO: get the status and if pending, show loader
 
   const wellsSelections = useSelector( state => state.wells.selectedIds );
   const logsSelections = useSelector( state => state.logs.selectedIds );
@@ -70,12 +73,13 @@ const EsaFilters = props => {
   )
 
   const plotButton = (
-    <EsaButton fullWidth className={classes.button} disabled={isFiltersButtonDisabled()} onClick={() => { console.log('btn clicked') }}>
+    <EsaButton fullWidth className={classes.button} disabled={isFiltersButtonDisabled()} onClick={() => calculatePlot()}>
       Show plot
     </EsaButton>
   );
 
   useEffect( async () => {
+    //TODO: add try-catch to handle the error
     const listSubscriptionArr = [];
     listSubscriptionArr.push({
       getList: esaAPI.endpoints.getWells.initiate,
@@ -100,11 +104,11 @@ const EsaFilters = props => {
       unsubscriptions.push( listSubscription );
     })
 
-    return unsubscriptions.map( subs => subs.unsubscribe );
+    return () => unsubscriptions.map( subs => subs.unsubscribe );
   }, [] )
 
   return (
-    <Grid item xs={12} container spacing={2} className={`${ classes.flexColumn } ${ classes.fullHeight }`} {...props}>
+    <Grid item xs={12} container spacing={2} className={`${ classes.flexColumn } ${ classes.fullHeight }`} {...rest}>
 
       <Grid item xs={12} className={classes.flex}>
         <EsaList
@@ -140,7 +144,7 @@ const EsaFilters = props => {
 
 EsaFilters.propTypes = {
   children: PropTypes.node,
-  className: PropTypes.string
+  calculatePlot: PropTypes.func
 };
 
 export default EsaFilters;

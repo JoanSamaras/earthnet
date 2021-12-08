@@ -1,15 +1,23 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Dashboard from '../layouts/Dashboard/Dashboard';
-import { Grid, makeStyles } from '@material-ui/core';
+import { Grid, makeStyles, Chip } from '@material-ui/core';
 import { EsaFilters } from '../layouts/components';
 import Plot from 'react-plotly.js';
 import { esaAPI } from '../store/slices/api';
-import { useDispatch } from 'react-redux';
-import { updateWells } from '../store/slices/wells';
+import { useDispatch, useSelector } from 'react-redux';
 
 const styles = theme => ({
   fullHeight: { 
     height: '100%' 
+  },
+  flex: {
+    display: 'flex'
+  },
+  justifyContentCenter: {
+    justifyContent: 'center'
+  },
+  infoMsg: {
+    paddingTop: '20%'
   }
 });
 const useStyles = makeStyles(styles);
@@ -21,21 +29,37 @@ export default function Wellbore() {
     width: 700,
     height: 500
   });
-  const [wellsList, setWellsList] = useState([]);
+  const [plotData, setPlotData] = useState([]);
+  const [plotReqUnsubscriptions, setPlotReqUnsubscriptions] = useState([]);
 
   const plotlyGridParentRef = useRef(HTMLDivElement);
 
-  // useEffect( async () => {
-  //   const test = await dispatch( esaAPI.endpoints.getWells.initiate() );
-  //   setWellsList( test.data );
-  //   dispatch( updateWells( test.data ) )
+  useEffect( () => {
+    return () => plotReqUnsubscriptions.map( subs => subs.unsubscribe );
+  }, [ plotReqUnsubscriptions ] )
 
-  //   return test.unsubscribe;
-  // }, [] )
+  const wellsSelections = useSelector( state => state.wells.selectedIds );
 
-  // useEffect( () => {
-  //   console.log('wells', wellsList)
-  // }, [wellsList] )
+  const formatPlotReqParams = () => wellsSelections.map( id => `wellId=${ id }`).join('&');
+
+  const calcPlot = async () => {
+    //TODO: show loader based on status (if 'pending')
+    const params = formatPlotReqParams();
+    const plotSubscription = dispatch( esaAPI.endpoints.getPlotData.initiate(params) );
+    const data = (await plotSubscription).data.map( d => ({
+      x: d.x,
+      y: d.y,
+      type: 'scatter',
+      showlegend: true,
+      name: `wellId-${d.wellId}`
+    }));
+
+    setPlotData( data );
+    setPlotReqUnsubscriptions([
+      ...plotReqUnsubscriptions,
+      plotSubscription
+    ]);
+  }
 
   useEffect( () => {
     if ( plotlyGridParentRef.current ) {
@@ -49,28 +73,27 @@ export default function Wellbore() {
     <Dashboard>
       <Grid container spacing={1} className={classes.fullHeight}>
         <Grid item xs={12} md={5} container spacing={2} className={classes.fullHeight}>
-          <EsaFilters />
+          <EsaFilters calculatePlot={calcPlot} />
         </Grid>
 
         <Grid item xs={12} md={7} container spacing={2}>
           <Grid item xs={12} container spacing={2}>
             <Grid item xs={12} ref={ plotlyGridParentRef }>
-            <Plot
-              data={[
-                {
-                  x: [1, 2, 3],
-                  y: [2, 6, 3],
-                  type: 'scatter',
-                  marker: {color: 'cyan'},
-                }
-              ]}
-              layout={{ 
-                title: 'Wells Plot',
-                width: chartLayout.width,
-                height: chartLayout.height
-              }}
-              config={{ responsive: true }}
-            />
+            { plotData.length > 0 ? (
+              <Plot
+                data={plotData}
+                layout={{ 
+                  title: 'Wells Plot',
+                  width: chartLayout.width,
+                  height: chartLayout.height
+                }}
+                config={{ responsive: true }}
+              />
+            ): (
+              <div className={`${ classes.flex } ${ classes.fullHeight } ${ classes.justifyContentCenter } ${ classes.infoMsg }`}>
+                <Chip label="No plot data yet. Try changing the filters and click on the 'show plot' button." />
+              </div>
+            ) }
             </Grid>
           </Grid>
         </Grid>

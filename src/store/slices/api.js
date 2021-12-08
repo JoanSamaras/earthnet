@@ -21,7 +21,7 @@ export const esaAPI = createApi({
         method: 'GET'
       })
     }),
-    getPlots: builder.query({
+    getPlotData: builder.query({
       query: ( params = undefined ) => ({
         url: 'plots',
         method: 'GET',
