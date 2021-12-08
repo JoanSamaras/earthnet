@@ -7,7 +7,7 @@ import { esaAPI } from './slices/api';
 // causing a reload when we navigate to a page and by default redux does not persist the state on refresh. We
 // could either turn the ListItem component to NavLink (the way it's used to redirect to the homepage) or we
 // could persist the state in sessionStorage (or in localStorage if we need the state to exist after we 
-// terminate the session - or have it loaded in another session as well)
+// terminate the session - or have it loaded in another session as well) and here, the latter was chosen.
 
 const loadState = () => {
   try {
@@ -16,7 +16,6 @@ const loadState = () => {
     if (serializedState === null) {
       return undefined;
     }
-
     return JSON.parse(serializedState);
   }
   catch (err) {

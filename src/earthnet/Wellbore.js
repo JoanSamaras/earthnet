@@ -98,7 +98,6 @@ export default function Wellbore() {
           </Grid>
         </Grid>
       </Grid>
-
     </Dashboard>
   );
 }
