@@ -61,15 +61,13 @@ const EsaFilters = props => {
   const classes = useStyles();
   const dispatch = useDispatch();
 
-  const isFiltersButtonDisabled = () => {
-    const wellsSelections = useSelector( state => state.wells.selectedIds );
-    const logsSelections = useSelector( state => state.logs.selectedIds );
-    const formationsSelections = useSelector( state => state.formations.selectedIds );
+  const wellsSelections = useSelector( state => state.wells.selectedIds );
+  const logsSelections = useSelector( state => state.logs.selectedIds );
+  const formationsSelections = useSelector( state => state.formations.selectedIds );
 
-    return (
-      wellsSelections.length >= 1 && logsSelections.length >= 1 && formationsSelections.length >= 1
-    )
-  }
+  const isFiltersButtonDisabled = () => (
+    wellsSelections.length < 1 || logsSelections.length < 1 || formationsSelections.length < 1
+  )
 
   const plotButton = (
     <EsaButton fullWidth className={classes.button} disabled={isFiltersButtonDisabled()} onClick={() => { console.log('btn clicked') }}>
@@ -96,8 +94,8 @@ const EsaFilters = props => {
 
     listSubscriptionArr.forEach( async subs => {
       const listSubscription = dispatch( subs.getList() );
-      const data = await listSubscription.data;
-      dispatch( subs.updateState({ data }) );
+      const data = (await listSubscription).data;
+      dispatch( subs.updateState( data ) );
 
       unsubscriptions.push( listSubscription );
     })

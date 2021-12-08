@@ -51,17 +51,32 @@ const listConfig = {
   displayField: {
     wells: 'name',
     logs: 'log',
-    formations: 'name'
+    formations: 'name',
+    static: 'value'
   }
 }
 
+const provideMockData = () => {
+  const mockData = [];
+
+  for (let index = 0; index < 20; index++) {
+    const element = {
+      id: index,
+      value: `item-${ index }`
+    };
+    mockData.push(element);
+  }
+
+  return mockData
+}
+
 const EsaList = props => {
-  const { title, listType, ...rest } = props;
+  const { title, listType, staticContent, ...rest } = props;
 
   const classes = useStyles();
   const dispatch = useDispatch();
-  const selectedOptions = useSelector( state => state[listType].selectedIds );
   const [selections, setSelect] = useState([]);
+  const selectedOptions = useSelector( state => state[listType].selectedIds ) || selections;
 
   const handleSelect = value => {
     const currentIndex = selectedOptions.indexOf(value.id);
@@ -74,12 +89,16 @@ const EsaList = props => {
     }
     
     setSelect(newSelectedOptions);
-    dispatch( listConfig.update[listType]({ selections: newSelectedOptions }) );
+
+    // in part 1 we're going to have a static EsaList component
+    if ( !staticContent ) {
+      dispatch( listConfig.update[listType]( newSelectedOptions ) );
+    }
   };
   
   const isSelected = value => selectedOptions.includes(value.id);
 
-  const options = useSelector( state => state[listType].data );
+  const options = useSelector( state => state[listType].data ) || provideMockData();
 
   return (
     <Portlet className={classes.flexGrow} {...rest}>
@@ -109,7 +128,12 @@ const EsaList = props => {
 EsaList.propTypes = {
   children: PropTypes.node,
   title: PropTypes.string,
-  listType: PropTypes.oneOf([ 'wells', 'logs', 'formations' ])
+  listType: PropTypes.oneOf([ 'wells', 'logs', 'formations', 'static' ]),
+  staticContent: PropTypes.bool
 };
+
+EsaList.defaultProps = {
+  staticContent: false
+}
 
 export default EsaList;

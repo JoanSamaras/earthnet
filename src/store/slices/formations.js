@@ -10,12 +10,10 @@ const formationsSlice = createSlice({
   initialState,
   reducers: {
     updateFormations(state, actions) {
-      const { data } = actions.payload;
-      state.data = [...data];
+      state.data = [...actions.payload];
     },
     updateSelections(state, actions) {
-      const { selections } = actions.payload;
-      state.selectedIds = [...selections];
+      state.selectedIds = [...actions.payload];
     }
   }
 })
