@@ -76,7 +76,12 @@ const EsaList = props => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const [selections, setSelect] = useState([]);
-  const selectedOptions = useSelector( state => state[listType].selectedIds ) || selections;
+  
+  const listTypeStateExists = useSelector( state => !!state[listType] );
+  
+  const selectedOptions = listTypeStateExists 
+    ? useSelector( state => state[listType].selectedIds ) 
+    : selections;
 
   const handleSelect = value => {
     const currentIndex = selectedOptions.indexOf(value.id);
@@ -98,7 +103,9 @@ const EsaList = props => {
   
   const isSelected = value => selectedOptions.includes(value.id);
 
-  const options = useSelector( state => state[listType].data ) || provideMockData();
+  const options = listTypeStateExists 
+    ? useSelector( state => state[listType].data ) 
+    : provideMockData();
 
   return (
     <Portlet className={classes.flexGrow} {...rest}>
