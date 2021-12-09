@@ -44,13 +44,15 @@ export default function Histogram() {
       { key: 'bar-stack', value: 'stack', text: 'stack' }
     ],
     orientation: [
-      { key: 'orientation-v', value: 'vertical', text: 'vertical' },
-      { key: 'orientation-h', value: 'horizontal', text: 'horizontal' }
+      { key: 'orientation-v', value: 'v', text: 'vertical' },
+      { key: 'orientation-h', value: 'h', text: 'horizontal' }
     ]
   };
   const [plotBarValue, onChangePlotBar] = useState(plotLayoutOptions.bar[0].value);
-  const [plotOrientationValue, onChangePlotOrientation] = useState(plotLayoutOptions.orientation[0].value);
-  
+  const [plotOrientationValue, onChangePlotOrientation] = useState(plotLayoutOptions.orientation[1].value);
+  const [plotXaxisPos, setPlotXaxisPos] = useState('left');
+  const [plotYaxisPos, setPlotYaxisPos] = useState('bottom');
+
   const plotlyGridParentRef = useRef(HTMLDivElement);
 
   useEffect( () => {
@@ -68,12 +70,15 @@ export default function Histogram() {
     const data = (await plotSubscription).data.map( d => ({
       x: d.x,
       y: d.y,
+      xaxis: 'x',
+      yaxis: 'y',
       type: 'histogram',
       showlegend: true,
       name: `wellId-${d.wellId}`
     }));
 
     setPlotData( data );
+    onChangePlotOrientation(plotLayoutOptions.orientation[1].value);
     setPlotReqUnsubscriptions([
       ...plotReqUnsubscriptions,
       plotSubscription
@@ -87,6 +92,17 @@ export default function Histogram() {
       setChartLayout({ width, height })
     }
   }, [plotlyGridParentRef] );
+
+  useEffect( () => {
+    const newPlotData = plotData.map( d => ({
+      ...d,
+      xaxis: d.xaxis === 'x' ? 'x2' : 'x',
+      yaxis: d.yaxis === 'y' ? 'y2' : 'y'
+    }))
+    setPlotData( newPlotData );
+    setPlotXaxisPos( plotXaxisPos === 'left' ? 'bottom' : 'left' );
+    setPlotYaxisPos( plotYaxisPos === 'bottom' ? 'left' : 'bottom' );
+  }, [plotOrientationValue] );
 
   return (
     <Dashboard>
@@ -131,7 +147,17 @@ export default function Histogram() {
                   title: 'Histogram Plot',
                   width: chartLayout.width,
                   height: chartLayout.height,
-                  barmode: plotBarValue
+                  barmode: plotBarValue,
+                  xaxis2: {
+                    side: 'top',
+                    overlaying: 'x',
+                    autorange: 'reversed'
+                  },
+                  yaxis2: {
+                    side: 'right',
+                    overlaying: 'y',
+                    autorange: 'reversed'
+                  }
                 }}
                 config={{ responsive: true }}
               />
