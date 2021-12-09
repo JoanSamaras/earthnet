@@ -11,7 +11,8 @@ import {
   PortletLabel,
   PortletContent,
   EsaButton,
-  PortletToolbar
+  PortletToolbar,
+  EsaList
 } from '../layouts/components';
 
 const styles = theme => ({
@@ -121,7 +122,21 @@ export default function ExamplePage() {
               </EsaPaper>
             </Grid>
           </Grid>
+
           <Grid item xs={12} container spacing={2}>
+            <Grid item xs={12}>
+              <Typography variant="body1">
+                This is the *static* EsaList component. Here, the state is not persisted and it's loaded with mock data.
+              </Typography>
+            </Grid>
+            <EsaList
+              staticContent
+              title='Title'
+              listType='static'
+            />
+          </Grid>
+
+          <Grid item xs={12} container spacing={4}>
             <Grid item xs={12}>
               <Typography variant="body1">* Usage of Portlet</Typography>
             </Grid>
