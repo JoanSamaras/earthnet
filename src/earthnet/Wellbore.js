@@ -76,8 +76,8 @@ export default function Wellbore() {
           <EsaFilters calculatePlot={calcPlot} />
         </Grid>
 
-        <Grid item xs={12} md={7} container spacing={2}>
-          <Grid item xs={12} container spacing={2}>
+        <Grid item xs={12} md={7} container>
+          <Grid item xs={12} container>
             <Grid item xs={12} ref={ plotlyGridParentRef }>
             { plotData.length > 0 ? (
               <Plot

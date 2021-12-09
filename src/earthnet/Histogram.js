@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Dashboard from '../layouts/Dashboard/Dashboard';
 import { Grid, makeStyles, Chip } from '@material-ui/core';
-import { EsaFilters } from '../layouts/components';
+import { EsaFilters, EsaPaper, EsaSelect } from '../layouts/components';
 import Plot from 'react-plotly.js';
 import { esaAPI } from '../store/slices/api';
 import { useDispatch, useSelector } from 'react-redux';
@@ -16,8 +16,14 @@ const styles = theme => ({
   justifyContentCenter: {
     justifyContent: 'center'
   },
+  justifyContentSpaceEvenly: {
+    justifyContent: 'space-evenly'
+  },
   infoMsg: {
     paddingTop: '20%'
+  },
+  paper: {
+    padding: theme.spacing(3)
   }
 });
 const useStyles = makeStyles(styles);
@@ -32,6 +38,19 @@ export default function Histogram() {
   const [plotData, setPlotData] = useState([]);
   const [plotReqUnsubscriptions, setPlotReqUnsubscriptions] = useState([]);
 
+  const plotLayoutOptions = {
+    bar: [
+      { key: 'bar-group', value: 'group', text: 'group' },
+      { key: 'bar-stack', value: 'stack', text: 'stack' }
+    ],
+    orientation: [
+      { key: 'orientation-v', value: 'vertical', text: 'vertical' },
+      { key: 'orientation-h', value: 'horizontal', text: 'horizontal' }
+    ]
+  };
+  const [plotBarValue, onChangePlotBar] = useState(plotLayoutOptions.bar[0].value);
+  const [plotOrientationValue, onChangePlotOrientation] = useState(plotLayoutOptions.orientation[0].value);
+  
   const plotlyGridParentRef = useRef(HTMLDivElement);
 
   useEffect( () => {
@@ -72,12 +91,38 @@ export default function Histogram() {
   return (
     <Dashboard>
       <Grid container spacing={1} className={classes.fullHeight}>
-        <Grid item xs={12} md={5} container spacing={2} className={classes.fullHeight}>
+        <Grid item xs={12} md={5} container spacing={2} className={`${ classes.fullHeight } ${ classes.justifyContentSpaceEvenly }`}>
+
+          <Grid item xs={12} container>
+            <Grid item xs={12}>
+              <EsaPaper className={classes.paper}>
+                <Grid container spacing={3}>
+                  <Grid item xs={6}>
+                    <EsaSelect
+                      label="Bar Mode"
+                      value={plotBarValue}
+                      options={plotLayoutOptions.bar}
+                      onChange={value => onChangePlotBar(value)}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <EsaSelect
+                      label="Orientation"
+                      value={plotOrientationValue}
+                      options={plotLayoutOptions.orientation}
+                      onChange={value => onChangePlotOrientation(value)}
+                    />
+                  </Grid>
+                </Grid>
+              </EsaPaper>
+            </Grid>
+          </Grid>
+
           <EsaFilters calculatePlot={calcPlot} />
         </Grid>
 
-        <Grid item xs={12} md={7} container spacing={2}>
-          <Grid item xs={12} container spacing={2}>
+        <Grid item xs={12} md={7} container>
+          <Grid item xs={12} container>
             <Grid item xs={12} ref={ plotlyGridParentRef }>
             { plotData.length > 0 ? (
               <Plot
@@ -85,7 +130,8 @@ export default function Histogram() {
                 layout={{ 
                   title: 'Histogram Plot',
                   width: chartLayout.width,
-                  height: chartLayout.height
+                  height: chartLayout.height,
+                  barmode: plotBarValue
                 }}
                 config={{ responsive: true }}
               />
