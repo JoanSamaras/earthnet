@@ -70,8 +70,6 @@ export default function Histogram() {
     const data = (await plotSubscription).data.map( d => ({
       x: d.x,
       y: d.y,
-      xaxis: 'x',
-      yaxis: 'y',
       type: 'histogram',
       showlegend: true,
       name: `wellId-${d.wellId}`
@@ -94,10 +92,11 @@ export default function Histogram() {
   }, [plotlyGridParentRef] );
 
   useEffect( () => {
-    const newPlotData = plotData.map( d => ({
+    const newPlotData = [...plotData].map( d => ({
       ...d,
-      xaxis: d.xaxis === 'x' ? 'x2' : 'x',
-      yaxis: d.yaxis === 'y' ? 'y2' : 'y'
+      x: d.y,
+      y: d.x,
+      orientation: d.orientation ? undefined : 'h'
     }))
     setPlotData( newPlotData );
     setPlotXaxisPos( plotXaxisPos === 'left' ? 'bottom' : 'left' );
@@ -151,12 +150,10 @@ export default function Histogram() {
                   xaxis2: {
                     side: 'top',
                     overlaying: 'x',
-                    autorange: 'reversed'
                   },
                   yaxis2: {
                     side: 'right',
                     overlaying: 'y',
-                    autorange: 'reversed'
                   }
                 }}
                 config={{ responsive: true }}
